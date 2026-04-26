@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Modal, TagList, RatingStars } from '../ui/UIComponents';
 import { useUI }     from '../../context/UIContext';
+import LoginPromptModal from './LoginPromptModal';
 import { useSocial } from '../../context/SocialContext';
 import { formatCount } from '../../utils/formatters';
 import { LockClosedIcon, GlobeAltIcon, StarIcon, CheckIcon } from '@heroicons/react/24/outline';
@@ -326,6 +327,7 @@ export default function ModalManager() {
       <CreateGroupModal />
       <SubscribeModal />
       <CreatePostModal />
+      <LoginPromptModal />
     </>
   );
 }

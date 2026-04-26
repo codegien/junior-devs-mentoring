@@ -27,6 +27,7 @@ export default function Sidebar() {
   const { currentUser, logout } = useAuth();
   const { unreadCount }         = useSocial();
   const { sidebarOpen, setSidebarOpen } = useUI();
+  const navigate = useNavigate();
 
   return (
     <>
@@ -114,7 +115,7 @@ export default function Sidebar() {
         </nav>
 
         {/* User Footer */}
-        {currentUser && (
+        {currentUser ? (
           <div style={{ padding: '12px 16px 20px', borderTop: '1px solid var(--border-subtle)' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
               <img
@@ -125,7 +126,7 @@ export default function Sidebar() {
               />
               <div style={{ flex: 1, minWidth: 0 }}>
                 <p style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-primary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                  {currentUser.firstName}
+                  {currentUser.firstName} {currentUser.lastName}
                 </p>
                 <p style={{ fontSize: 11, color: 'var(--text-muted)' }}>@{currentUser.username}</p>
               </div>
@@ -138,6 +139,27 @@ export default function Sidebar() {
                 <ArrowRightOnRectangleIcon style={{ width: 16, height: 16 }} />
               </button>
             </div>
+          </div>
+        ) : (
+          /* Guest footer — prompt to join */
+          <div style={{ padding: '12px 16px 20px', borderTop: '1px solid var(--border-subtle)' }}>
+            <p style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 10, textAlign: 'center' }}>
+              Join to unlock all features
+            </p>
+            <button
+              className="btn btn-primary"
+              style={{ width: '100%', marginBottom: 8, fontSize: 13 }}
+              onClick={() => navigate('/login?tab=register')}
+            >
+              Sign Up Free
+            </button>
+            <button
+              className="btn btn-secondary"
+              style={{ width: '100%', fontSize: 13 }}
+              onClick={() => navigate('/login')}
+            >
+              Sign In
+            </button>
           </div>
         )}
       </aside>

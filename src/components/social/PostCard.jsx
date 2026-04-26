@@ -4,27 +4,34 @@ import {
   BookmarkIcon, EllipsisHorizontalIcon,
 } from '@heroicons/react/24/outline';
 import { HeartIcon as HeartSolid, BookmarkIcon as BookmarkSolid } from '@heroicons/react/24/solid';
-import { useSocial } from '../../context/SocialContext';
+import { useSocial }     from '../../context/SocialContext';
+import { useAuthGuard }  from '../../hooks/useAuthGuard';
 import { timeAgo, formatCount } from '../../utils/formatters';
 import { VerifiedBadge, TagList } from '../ui/UIComponents';
 
 export default function PostCard({ post, delay = 0 }) {
   const { likedPosts, togglePostLike } = useSocial();
-  const [saved, setSaved]   = useState(false);
+  const guard   = useAuthGuard();
+  const [saved, setSaved]     = useState(false);
   const [expanded, setExpanded] = useState(false);
 
-  const isLiked = likedPosts.has(post.id);
-  const likeCount = post.likes + (isLiked ? 1 : 0);
-
+  const isLiked    = likedPosts.has(post.id);
+  const likeCount  = post.likes + (isLiked ? 1 : 0);
   const longContent = post.content.length > 200;
   const displayContent = longContent && !expanded
     ? post.content.slice(0, 200) + '…'
     : post.content;
 
+  // Guard-wrapped handlers — show login prompt if not authenticated
+  const handleLike    = guard(() => togglePostLike(post.id), 'like posts');
+  const handleSave    = guard(() => setSaved(s => !s),       'save posts');
+  const handleComment = guard(() => {},                       'comment on posts');
+  const handleShare   = guard(() => {},                       'share posts');
+
   return (
     <article
       className="card animate-fade-up"
-      style={{ padding: '20px', marginBottom: 0, animationDelay: `${delay}ms` }}
+      style={{ padding: '20px', animationDelay: `${delay}ms` }}
     >
       {/* Header */}
       <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 14 }}>
@@ -76,33 +83,23 @@ export default function PostCard({ post, delay = 0 }) {
       {/* Actions */}
       <div style={{
         display: 'flex', alignItems: 'center',
-        borderTop: '1px solid var(--border-subtle)',
-        paddingTop: 12, gap: 0,
+        borderTop: '1px solid var(--border-subtle)', paddingTop: 12, gap: 0,
       }}>
-        {/* Like */}
         <ActionBtn
           icon={isLiked ? <HeartSolid style={{ width: 18, height: 18 }} /> : <HeartIcon style={{ width: 18, height: 18 }} />}
-          count={likeCount}
-          active={isLiked}
-          activeColor="var(--red)"
-          onClick={() => togglePostLike(post.id)}
-          label="Like"
+          count={likeCount} active={isLiked} activeColor="var(--red)"
+          onClick={handleLike} label="Like"
         />
-        {/* Comment */}
         <ActionBtn
           icon={<ChatBubbleOvalLeftIcon style={{ width: 18, height: 18 }} />}
-          count={post.comments}
-          label="Comment"
+          count={post.comments} label="Comment" onClick={handleComment}
         />
-        {/* Share */}
         <ActionBtn
           icon={<ArrowPathIcon style={{ width: 18, height: 18 }} />}
-          count={post.shares}
-          label="Share"
+          count={post.shares} label="Share" onClick={handleShare}
         />
-        {/* Save */}
         <button
-          onClick={() => setSaved(s => !s)}
+          onClick={handleSave}
           style={{
             marginLeft: 'auto', background: 'none', border: 'none', cursor: 'pointer',
             color: saved ? 'var(--primary-light)' : 'var(--text-muted)',

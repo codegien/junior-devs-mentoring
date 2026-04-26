@@ -99,7 +99,7 @@ export default function Topbar() {
           )}
         </button>
 
-        {currentUser && (
+        {currentUser ? (
           <button
             onClick={() => navigate('/profile')}
             style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 2 }}
@@ -111,6 +111,15 @@ export default function Topbar() {
               className="avatar-ring-primary"
             />
           </button>
+        ) : (
+          <div style={{ display: 'flex', gap: 6 }}>
+            <button className="btn btn-ghost btn-sm" onClick={() => navigate('/login')} style={{ fontSize: 13 }}>
+              Sign In
+            </button>
+            <button className="btn btn-primary btn-sm" onClick={() => navigate('/login?tab=register')} style={{ fontSize: 13 }}>
+              Sign Up
+            </button>
+          </div>
         )}
       </div>
     </header>

@@ -1,26 +1,31 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { MapPinIcon, BriefcaseIcon, HeartIcon, SparklesIcon } from '@heroicons/react/24/outline';
-import { HeartIcon as HeartSolid } from '@heroicons/react/24/solid';
+import { MapPinIcon, BriefcaseIcon, HeartIcon } from '@heroicons/react/24/outline';
+import { HeartIcon as HeartSolid }              from '@heroicons/react/24/solid';
 import { useSocial }    from '../../context/SocialContext';
+import { useAuthGuard } from '../../hooks/useAuthGuard';
 import { formatCount, displayName } from '../../utils/formatters';
-import { VerifiedBadge, TagList } from '../ui/UIComponents';
+import { VerifiedBadge, TagList }   from '../ui/UIComponents';
 
 export default function ProfileCard({ user, delay = 0 }) {
   const { following, toggleFollow, likedUsers, toggleUserLike } = useSocial();
+  const guard    = useAuthGuard();
   const navigate = useNavigate();
 
   const isFollowing = following.has(user.id);
   const isLiked     = likedUsers.has(user.id);
-
   const goToProfile = () => navigate(`/profile/${user.id}`);
+
+  // Guard-wrapped handlers
+  const handleFollow = guard(() => toggleFollow(user.id),     'follow people');
+  const handleLike   = guard(() => toggleUserLike(user.id),   'like profiles');
 
   return (
     <div
       className="card animate-fade-up"
       style={{ padding: 20, animationDelay: `${delay}ms`, cursor: 'default' }}
     >
-      {/* Top: avatar + name */}
+      {/* Avatar + name */}
       <div style={{ display: 'flex', alignItems: 'flex-start', gap: 14, marginBottom: 14 }}>
         <img
           src={user.image}
@@ -40,8 +45,6 @@ export default function ProfileCard({ user, delay = 0 }) {
             {user.isVerified && <VerifiedBadge size={14} />}
           </div>
           <p style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 1 }}>@{user.username}</p>
-
-          {/* Location + occupation */}
           <div style={{ display: 'flex', gap: 12, marginTop: 6, flexWrap: 'wrap' }}>
             <span style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 12, color: 'var(--text-secondary)' }}>
               <MapPinIcon style={{ width: 12, height: 12 }} />
@@ -55,14 +58,12 @@ export default function ProfileCard({ user, delay = 0 }) {
         </div>
       </div>
 
-      {/* Bio */}
       {user.bio && (
         <p style={{ fontSize: 13, color: 'var(--text-secondary)', marginBottom: 12, lineHeight: 1.55 }}>
           {user.bio.length > 100 ? user.bio.slice(0, 100) + '…' : user.bio}
         </p>
       )}
 
-      {/* Interests */}
       {user.interests?.length > 0 && (
         <div style={{ marginBottom: 14 }}>
           <TagList tags={user.interests} max={3} />
@@ -98,13 +99,13 @@ export default function ProfileCard({ user, delay = 0 }) {
         <button
           className={`btn ${isFollowing ? 'btn-secondary' : 'btn-primary'}`}
           style={{ flex: 1, fontSize: 13 }}
-          onClick={() => toggleFollow(user.id)}
+          onClick={handleFollow}
         >
           {isFollowing ? 'Following ✓' : '+ Follow'}
         </button>
         <button
           className="btn btn-ghost btn-icon"
-          onClick={() => toggleUserLike(user.id)}
+          onClick={handleLike}
           style={{ color: isLiked ? 'var(--red)' : 'var(--text-secondary)' }}
           title={isLiked ? 'Unlike' : 'Like'}
         >
@@ -112,11 +113,7 @@ export default function ProfileCard({ user, delay = 0 }) {
             ? <HeartSolid style={{ width: 20, height: 20 }} />
             : <HeartIcon  style={{ width: 20, height: 20 }} />}
         </button>
-        <button
-          className="btn btn-ghost"
-          style={{ fontSize: 13, color: 'var(--text-secondary)' }}
-          onClick={goToProfile}
-        >
+        <button className="btn btn-ghost" style={{ fontSize: 13 }} onClick={goToProfile}>
           View
         </button>
       </div>
